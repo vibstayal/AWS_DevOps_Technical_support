@@ -1,0 +1,74 @@
+#Send SMS Notification for high priority Cloud Watch Events
+import json
+import os
+import re
+import boto3
+import logging
+from botocore.exceptions import ClientError
+
+
+# Setup Logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logger.info('Loading function to process SNS Notifications')
+
+# Create SNS Client
+client = boto3.client("sns", region_name="ca-central-1")
+
+expr_E164 = "^\+[1-9][\d]{8,14}(;ext=[\d]{3,6})?$"
+regex = re.compile(expr_E164)
+
+def lambda_handler(event, context):
+    
+    # Extract Message from SNS Event
+    message = ""
+    try:
+        # Extract Message
+        subject = event['Records'][0]['Sns']['Subject']
+        message = event['Records'][0]['Sns']['Message']
+    except:
+        logger.info("Nothing to process")
+        return "Nothing to process"
+
+    try:
+        # Extract Alarm
+        alarm = json.loads(message)
+        alarmName = alarm['AlarmName']
+        alarmDesc = alarm['AlarmDescription']
+        alarmState = alarm['NewStateValue']
+        alarmReason = alarm['NewStateReason']
+
+    except:
+        logger.info("Not a Cloudwatch Alarm")
+        return "Nothing to process"
+
+    # Build SMS Message
+    smsMessage = alarmState + ": " + alarmName + ".\n" + alarmDesc + ". " + alarmReason
+    smsMessage = smsMessage[:140] # Shorten to SMS length
+    logger.info(smsMessage)
+    
+    # Get List of all recepients
+    for name, phonenum in os.environ.items():
+        # Check if value is like Mobile Number to process
+        if regex.match(phonenum):
+            logger.info('Sending SMS to: ' + name)
+            try:
+                response = client.publish(PhoneNumber=phonenum,
+                    Message=smsMessage,
+                    MessageAttributes = {
+                        'AWS.SNS.SMS.SMSType': {
+                            'DataType': 'String',
+                            'StringValue': 'Transactional'
+                        }
+                    }
+                )                
+                message_id = response["MessageId"]
+                logger.info('Message ID: ' + message_id)
+            except ClientError as error:
+                logger.error(error.response["Error"]["Code"])
+                logger.error(error.response["Error"]["Message"])
+                
+    
+    # Return Success
+    logger.info("Sent SMS Notifications")
+    return "success"
