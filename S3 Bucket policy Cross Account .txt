@@ -1,0 +1,20 @@
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "Permission to cross account",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": [
+                    "arn:aws:iam::190298128070:root",
+                    "arn:aws:iam::026785256678:root"
+                ]
+            },
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::databasecode",
+                "arn:aws:s3:::databasecode/*"
+            ]
+        }
+    ]
+}

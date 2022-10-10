@@ -1,0 +1,26 @@
+curl https://omnitruck.chef.io/install.sh | sudo bash -s -- -P chefdk -c stable -v 0.16.28
+
+sudo yum install telnet-server telnet
+
+
+wget s3 location
+
+
+berks install
+ SSL_CERT_FILE='.chef/ca_certs/opsworks-cm-ca-2016-root.pem' berks upload
+
+
+knife ssl fetch https://ec2-34-209-218-181.us-west-2.compute.amazonaws.com
+
+knife wsman test 34.209.218.181 --manual-list
+
+knife bootstrap windows winrm 10.0.1.204 --winrm-user Administrator --winrm-password 'GF3=ZEH5b5' --node-name iiswin --run-list 'recipe[wordpress]'
+
+knife bootstrap windows winrm 10.0.0.43 --winrm-user kamal --winrm-password 'Falero@123'  --node-name iiswin --run-list 'recipe[chef-client]'
+
+
+
+
+
+
+$ berks init ~/chef-repo/cookbooks/rabbitmq

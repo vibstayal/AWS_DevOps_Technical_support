@@ -1,0 +1,66 @@
+package com.amazonaws.lambda.downloader;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import org.apache.commons.net.ftp.FTPClient;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
+public class LambdaFunctionHandler {
+
+     void handleRequest() {
+		String server = "demo.wftpserver.com";
+		int port = 21;
+		String user = "demo-user";
+		String pass = "demo-user";
+		File file = null;
+		String remoteLocationFTPFile ="";
+		FTPClient ftpClient = new FTPClient();
+		try {
+			ftpClient.connect(server, port);
+			ftpClient.login(user, pass);
+			ftpClient.enterLocalPassiveMode();
+			//ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+			remoteLocationFTPFile = "/upload/DemoFile.txt";
+			file = File.createTempFile("aws-java-sdk-", ".txt");
+			file.deleteOnExit();
+			OutputStream outputStream1 = new BufferedOutputStream(new FileOutputStream(file));
+			ftpClient.retrieveFile(remoteLocationFTPFile, outputStream1);
+			outputStream1.close();
+		} catch (IOException ex) {
+			System.out.println("Error: " + ex.getMessage());
+		} finally {
+			try {
+				if (ftpClient.isConnected()) {
+					ftpClient.logout();
+					ftpClient.disconnect();
+				}
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		String filename = remoteLocationFTPFile.substring(remoteLocationFTPFile.lastIndexOf("/") + 1);
+		System.out.println(filename);
+		AWSCredentials credentials = new BasicAWSCredentials("AKIAIMD4XZTO22VZMLMQ",
+			      "H22Iw9uQjTfBciDhG9AU5Ot4mGOKAqvvusS/NsGB");
+		AmazonS3 s3 = new AmazonS3Client(credentials);
+        Region usWest2 = Region.getRegion(Regions.US_WEST_2);
+        s3.setRegion(usWest2);
+        String bucketName = "ftpdownloader";
+        String key = filename;	
+         s3.createBucket(bucketName);
+         s3.putObject(new PutObjectRequest(bucketName, key, file));
+         System.out.println("Successfully Downloaded file in S3 Bucket");
+	
+         }
+
+}

@@ -1,0 +1,96 @@
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name feedbackId-index --key-condition-expression "feedbackId = :id" --expression-attribute-values file://values.json --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-createdHour-index --key-condition-expression "created = :id" --expression-attribute-values file://values.json --select COUNT --profile PROD --region eu-west-1
+
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-createdHour-index --key-condition-expression "created = :id and createdHour > :no" --expression-attribute-values file://values.json --select COUNT --profile PROD --region eu-west-1
+
+{
+    ":id":{"S":"2019-1-27"},
+    ":no":{"N":"6"}
+}
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :name" --expression-attribute-values file://values.json --select COUNT --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :name" --expression-attribute-values file://values.json --projection-expression "errorReason" --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :name" --filter-expression "errorReason = :names" --expression-attribute-values file://values.json --projection-expression "errorReason" --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :name" --filter-expression "errorReason = :names" --expression-attribute-values file://values.json --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :sub" --expression-attribute-values file://values.json --profile PROD --region eu-west-1
+
+{
+    ":id":{"S":"2019-1-27"},
+    ":sub":{"S":"Fail"}
+}
+
+aws dynamodb query --table-name dch_prod_email_archiveAudit --index-name created-flag-index --key-condition-expression "created = :id and flag = :sub" --expression-attribute-values file://values.json --projection-expression "errorReason" --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_uat_email_audit --index-name feedbackId-index --key-condition-expression "feedbackId = :id" --expression-attribute-values file://values.json --profile default --region eu-west-1
+
+aws dynamodb query --table-name dch_email_audit --index-name itemCode-index --key-condition-expression "itemCode = :id" --expression-attribute-values file://values.json --profile default --region eu-west-1
+
+aws dynamodb scan --table-name dch_uat_saveTemplate --projection-expression "tempId" --region eu-west-1
+
+let paramsForSuccessRecords = {
+    TableName: "dch_prod_email_audit",
+	IndexName: "created-flag-index",
+	KeyConditionExpression: "created = :created and flag = :flag",
+	ExpressionAttributeValues: {
+        ":created": createdPreviousDate,
+        ":flag": "Success"
+    }
+};
+
+
+{
+    ":a": {"N": "1540278675"}
+
+}
+
+aws dynamodb scan --table-name dch_prod_auditing --select COUNT --filter-expression "startDateTime >= :a" --expression-attribute-values file://key.json --profile PROD --region eu-west-1
+{
+    "Count": 100905,
+    "ScannedCount": 100911,
+    "ConsumedCapacity": null
+}
+
+
+aws dynamodb scan --table-name dch_prod_auditing --select COUNT --filter-expression "startDateTime >= :a and flag = :b" --expression-attribute-values file://key.json --profile PROD --region eu-west-1
+
+aws dynamodb scan --table-name dch_prod_auditing --filter-expression "itemCode :a" --expression-attribute-values file://key.json --profile PROD --region eu-west-1
+
+
+{
+":a": {"N": "1540278675"},
+":b": {"S": "Fail"}
+
+}
+
+
+{
+    "Count": 3,
+    "ScannedCount": 100911,
+    "ConsumedCapacity": null
+}
+
+{
+":a": {"N": "1540278675"},
+":b": {"S": "Success"}
+
+}
+{
+    "Count": 100902,
+    "ScannedCount": 100911,
+    "ConsumedCapacity": null
+}
+
+aws dynamodb scan --table-name dch_prod_auditing --select COUNT --filter-expression "functionName = :name and startDateTime > :start and endDateTime < :end and flag = :sub" --expression-attribute-values  file://values.json --profile PROD --region eu-west-1
+
+aws dynamodb scan --table-name dch_uat_saveTemplate --select COUNT --region eu-west-1
+
+aws dynamodb scan --table-name dch_prod_auditing --select COUNT --filter-expression "functionName = :name and itemCode = :sub" --expression-attribute-values  file://values.json --profile PROD --region eu-west-1
+
+aws dynamodb query --table-name dch_prod_auditing --select COUNT --key-condition-expression "functionName = :name AND itemCode = :sub" --expression-attribute-values file://323212277900000189618030.json
+
+aws dynamodb query --table-name dch_prod_auditing --key-condition-expression "functionName = :name" --filter-expression "feedbackId = :sub" --expression-attribute-values file://values.json --profile PROD --region eu-west-1

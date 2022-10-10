@@ -1,0 +1,72 @@
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match_all": {} },
+ "_source": ["account_number", "balance"]
+
+}
+'
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+ "size": 100,
+"sort": { "balance": { "order": "desc" } }
+
+}
+'
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match_all": {} },
+ "_source": ["account_number", "balance"]
+
+}
+'
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match": { "account_number": 20 } }
+}'
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match": { "address": "mill lane" } }
+}'
+
+ curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": { "match_phrase": { "address": "mill lane" } }
+}'
+
+
+The bool query allows us to compose smaller queries into bigger queries using boolean logic.
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "address": "mill" } },
+        { "match": { "address": "lane" } }
+      ]
+    }
+  }
+}'
+
+
+curl -XGET 'https://search-idw-rcx5ad6j44qd5gwukcav3capwm.us-west-2.es.amazonaws.com/bank/_search?pretty' -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "bool": {
+      "must": { "match_all": {} },
+      "filter": {
+        "range": {
+          "balance": {
+            "gte": 20000,
+            "lte": 30000
+          }
+        }
+      }
+    }
+  }
+}'
+
