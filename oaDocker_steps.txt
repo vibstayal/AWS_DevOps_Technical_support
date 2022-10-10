@@ -1,0 +1,161 @@
+FROM python:3.4
+RUN yum update \
+    && yum install -y --no-install-recommends \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/opsalert-app
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+FROM python:alpine3.7
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
+EXPOSE 5000
+CMD python ./index.py
+
+------------------------------------------------------------------------
+FROM python:3.6
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/opsalert-app
+COPY local.txt ./
+COPY base.txt ./
+RUN pip install -r local.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+--------------------------------------------------------------------------
+FROM python:3.6
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/opsalert-app
+COPY local.txt ./
+COPY base.txt ./
+RUN pip install -r local.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+-----------------------------------------------------------------------------
+Name: boto3
+Version: 1.17.24
+
+Name: botocore
+Version: 1.20.24
+
+Need extra packages to be installed in container -
+pip install django-health-check
+pip install health-check
+pip install jsonschema
+pip install deepdiff
+pip install netaddr
+pip install policyuniverse
+pip install dpath
+
+stackarmor OA video - https://stackarmor.atlassian.net/wiki/spaces/OP/pages/1795260420/Install+Videos+-+Apr+09+2021
+sA github - given access to my github user
+
+------------------------------------------------------------
+Steps follwed:
+1. create docker file which is above
+2. docker build .
+3. image is crteated -> docker run --name DemoOA -p :8000 -d af146a40969b
+4. Access with localIP
+5. Go inn container -> docker exec -it contaonerID bash
+6. docker tag imageID vibhutayal/finalIDname:version1
+7. docker login
+8. docker push vibhutayal/imageID:Tag
+9. Go in container
+10. Change as required
+11. exit the container
+12. docker commit containerID -> New image will be created 
+
+Dockerhub access -username - vibstayal, Pass- ***
+
+----------------------------------------------------------
+Challenges faced:
+1. Version Python version 3.6 not 3.4
+2. Django secret key -> .env not present
+3. IP Mapping from Portarainer resolved 
+4. Vim install using apt-get update 
+--------------------------------------------------------------
+To get started:
+1. docker pull vibhutayal/oadocker:version1
+2. docker run --name  oadocker -p :8000 -d 5fdc5d5fa348
+3. docker ps -> Note the Port 
+4. Access the OA site -> YourIP:Port
+--------------------------------------------------------------
+For Docker Portainer:service rh-nginx116-nginx
+docker volume create portainer_data
+$ docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+username - admin password -  ***
+
+------------------------------------------------------------------------
+RDS URL parameter:  in .env file:-
+DJANGO_SETTINGS_MODULE=config.settings.local
+DATABASE_URL=postgres://saopsalert:****@opsalert-dev.ciroswjzae6s.us-east-1.rds.amazonaws.com:5432/opsalertdev
+DJANGO_ALLOWED_HOSTS=3.225.109.149,0.0.0.0,localhost,127.0.0.1,192.168.1.145,0.0.0.0/0
+DJANGO_BASE_URL=http://192.168.1.145:8000/oa
+DJANGO_MAIL_SENDER=opsalert@stackArmor.com
+DJANGO_SECRET_KEY="***"
+DEBUG=True
+-----------------Errors occured--------------------
+ERROR: pip's legacy dependency resolver does not consider dependency conflicts when selecting packages. This behaviour is the source of the following dependency conflicts.
+botocore 1.20.102 requires urllib3<1.27,>=1.25.4, but you'll have urllib3 1.24.3 which is incompatible.
+
+ERROR: Cannot install -r ./requirements/./base.txt (line 34) and urllib3>=1.25.4 because these package versions have conflicting dependencies.
+requests 2.21.0 depends on urllib3<1.25 and >=1.21.1
+
+
+After setting packages, launching error -
+Could not detect AWS default region in AWS_DEFAULT_REGION or ~/.aws/config file.
+Setting to us-east-1. If this is incorrect, please set the value for default region at one of above locations.
+
+/usr/local/lib/python3.6/site-packages/environ/environ.py:639: UserWarning: Error reading /opt/opsalert-app/.env - if you're not configuring your environment separately, check this.
+"environment separately, check this." % env_file)
+/opt/opsalert-app/config/settings/base.py:294: UserWarning: DJANGO_ADMINS is not defined - define this value in .env file or run `/opt/opsalert/opsalert-app/.venv/bin/python /opt/opsalert/opsalert-app/deploy/script/setup_env.py` command to help generate one
+f"{env_var} is not defined - define this value in .env file or "
+/opt/opsalert-app/config/settings/base.py:294: UserWarning: DJANGO_MANAGERS is not defined - define this value in .env file or run `/opt/opsalert/opsalert-app/.venv/bin/python /opt/opsalert/opsalert-app/deploy/script/setup_env.py` command to help generate one
+f"{env_var} is not defined - define this value in .env file or "
+/opt/opsalert-app/config/settings/base.py:294: UserWarning: SCANNED_REGIONS is not defined - define this value in .env file or run `/opt/opsalert/opsalert-app/.venv/bin/python /opt/opsalert/opsalert-app/deploy/script/setup_env.py` command to help generate one
+f"{env_var} is not defined - define this value in .env file or "
+Traceback (most recent call last):
+
+File "/usr/local/lib/python3.6/site-packages/environ/environ.py", line 273, in get_value
+value = self.ENVIRON[var]
+File "/usr/local/lib/python3.6/os.py", line 669, in __getitem__
+raise KeyError(key) from None
+KeyError: 'DJANGO_SECRET_KEY'
+During handling of the above exception, another exception occurred:
+Traceback (most recent call last):
+File "manage.py", line 30, in <module>
+execute_from_command_line(sys.argv)
+File "/usr/local/lib/python3.6/site-packages/django/core/management/__init__.py", line 381, in execute_from_command_line
+exceptions.ImproperlyConfigured: Set the DJANGO_SECRET_KEY environment variable
+
+
+------------Challenges Resolved -----------
+add in base.txt -
+urllib3>=1.25.4
+idna<3
+update in base.txt -
+requests==2.25.1
+Mention env file in when running container with cmd -
+docker run --name oadockercontainer --env-file envfile -p :8000 -d e86075e10c99
+
+
+
+
+
+
+
+
+
