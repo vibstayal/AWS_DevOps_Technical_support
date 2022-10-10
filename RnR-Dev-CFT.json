@@ -1,0 +1,1389 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Global Name"
+                    },
+                    "Parameters": [
+                        "ApplicationName",
+                        "EnvironmentType"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "PrivateSubnet1aAZ",
+                        "PrivateSubnet1bAZ",
+                        "vpc",
+                        "PrivateSubnet1aCIDR",
+                        "PrivateSubnet1bCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Ec2 Configuration"
+                    },
+                    "Parameters": [
+                        "InstanceTypeAppServer",
+                        "InstanceTypeWebServer",
+						"InstanceTypeSSRSServer",
+						"AppServerRootVolumeSize",
+						"WebServerRootVolumeSize",
+						"SSRSServerRootVolumeSize",
+                        "KeyName",
+                        "XendesktopIP"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Database Configuration"
+                    },
+                    "Parameters": [
+                        "DBUsername",
+                        "DBPassword",
+                        "DBInstanceClass",
+                        "RDSStorage",
+                        "RDSAZ"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "ApplicationName": {
+            "Description": "The Application Name",
+            "Type": "String",
+            "Default": "RnR",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+        },
+        "EnvironmentType": {
+            "Description": "The environment type",
+            "Type": "String",
+            "Default": "UAT",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+        },
+        "vpc": {
+            "Description": "Select VPC ",
+            "Type": "AWS::EC2::VPC::Id"
+        },
+        "PrivateSubnet1aAZ": {
+            "Description": "Select AZ for your Private Subnet",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "ConstraintDescription": "Must select AZ from drop-down."
+        },
+        "PrivateSubnet1bAZ": {
+            "Description": "Select AZ for your Private Subnet in diffrent AZ",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "ConstraintDescription": "Must select AZ from drop-down."
+        },
+        "PrivateSubnet1aCIDR": {
+            "Description": " Enter CIDR for first private subnet",
+            "Type": "String"
+        },
+        "PrivateSubnet1bCIDR": {
+            "Description": " Enter CIDR for second private subnet in different AZ",
+            "Type": "String"
+        },
+        "InstanceTypeAppServer": {
+            "Description": "Select EC2 instance Type for App Server",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type."
+        },
+		"AppServerRootVolumeSize": {
+			"Description": "Enter App Server 'C' Drive Size in GB",
+            "Type": "String",
+            "Default": "100"
+		},
+        "InstanceTypeWebServer": {
+            "Description": "Select EC2 instance Type for Web Server",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type."
+        },
+		"WebServerRootVolumeSize": {
+			"Description": "Enter Web Server 'C' Drive Size in GB",
+            "Type": "String",
+            "Default": "100"
+		},
+        "InstanceTypeSSRSServer": {
+		"Description": "Select EC2 instance Type for SSRS Server",
+            "Type": "String",
+            "Default": "t2.micro",
+            "AllowedValues": [
+                "t1.micro",
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m1.small",
+                "m1.medium",
+                "m1.large",
+                "m1.xlarge",
+                "m2.xlarge",
+                "m2.2xlarge",
+                "m2.4xlarge",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c1.medium",
+                "c1.xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge",
+                "g2.2xlarge",
+                "r3.large",
+                "r3.xlarge",
+                "r3.2xlarge",
+                "r3.4xlarge",
+                "r3.8xlarge",
+                "i2.xlarge",
+                "i2.2xlarge",
+                "i2.4xlarge",
+                "i2.8xlarge",
+                "d2.xlarge",
+                "d2.2xlarge",
+                "d2.4xlarge",
+                "d2.8xlarge",
+                "hi1.4xlarge",
+                "hs1.8xlarge",
+                "cr1.8xlarge",
+                "cc2.8xlarge",
+                "cg1.4xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type."
+        },
+		"SSRSServerRootVolumeSize": {
+			"Description": "Enter SSRS Server 'C' Drive Size in GB",
+            "Type": "String",
+            "Default": "100"
+		},
+		"KeyName": {
+            "Description": "Select a Key for EC2 Instances",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Default": "RnRKeyPair",
+            "ConstraintDescription": "Must be the name of an existing EC2 KeyPair."
+        },
+        "DBUsername": {
+            "Default": "Admin",
+            "NoEcho": "false",
+            "Description": "Database username",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "16",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "DBPassword": {
+            "NoEcho": "true",
+            "Description": "Database password",
+            "Type": "String",
+            "MinLength": "8",
+            "MaxLength": "41",
+            "AllowedPattern": "[a-zA-Z0-9]*",
+            "ConstraintDescription": "must contain only alphanumeric characters."
+        },
+        "DBInstanceClass": {
+            "Description": "SQL Server SE Instance Type",
+            "Type": "String",
+            "Default": "db.r3.xlarge",
+            "AllowedValues": [
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge"
+            ],
+            "ConstraintDescription": "Select DB instance type from Drop-down."
+        },
+        "RDSAZ": {
+            "Description": "Select AZ for your RDS",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "ConstraintDescription": "Must select AZ from drop-down."
+        },
+        "RDSStorage": {
+            "Description": "Enter RDS DB Storage Size in GB",
+            "Type": "String",
+            "Default": "1024"
+        },
+        "XendesktopIP": {
+            "Description": "The IP address of Xendesktop(10.153.0.0/16)",
+            "Type": "String",
+            "MinLength": "9",
+            "MaxLength": "40",
+            "Default": "10.153.0.0/16",
+            "ConstraintDescription": "Must contain atleast one IP Address."
+        }
+    },
+    "Mappings": {
+        "AWSRegionArch2AMI": {
+            "us-east-1": {
+                "Windows2012r2": "ami-ce792ab4"
+            },
+            "us-west-2": {
+                "Windows2012r2": "ami-3189ec51"
+            },
+            "us-west-1": {
+                "Windows2012r2": "ami-b4614cd4"
+            },
+            "eu-west-1": {
+                "Windows2012r2": "ami-96d4daf0"
+            },
+            "eu-west-2": {
+                "Windows2012r2": "ami-07455263"
+            },
+            "eu-central-1": {
+                "Windows2012r2": "ami-f9528c96"
+            },
+            "ap-northeast-1": {
+                "Windows2012r2": "ami-539aa834"
+            },
+            "ap-northeast-2": {
+                "Windows2012r2": "ami-50e13c3e"
+            },
+            "ap-southeast-1": {
+                "Windows2012r2": "ami-9e3bbefd"
+            },
+            "ap-southeast-2": {
+                "Windows2012r2": "ami-c4262ca7"
+            },
+            "ap-south-1": {
+                "Windows2012r2": "ami-67047908"
+            },
+            "us-east-2": {
+                "Windows2012r2": "ami-7fc4e31a"
+            },
+            "ca-central-1": {
+                "Windows2012r2": "ami-687ec20c"
+            },
+            "sa-east-1": {
+                "Windows2012r2": "ami-af6708c3"
+            }
+        },
+        "AWSRegionSSRSAMI": {
+            "us-east-1": {
+                "Windows2008r2SQL": "ami-3ab1c640"
+            },
+            "us-west-2": {
+                "Windows2008r2SQL": "ami-3583e655"
+            },
+            "us-west-1": {
+                "Windows2008r2SQL": "ami-c06449a0"
+            },
+            "eu-west-1": {
+                "Windows2008r2SQL": "ami-06d6d860"
+            },
+            "eu-west-2": {
+                "Windows2008r2SQL": "ami-7b584f1f"
+            },
+            "eu-central-1": {
+                "Windows2008r2SQL": "ami-ef578980"
+            },
+            "ap-northeast-1": {
+                "Windows2008r2SQL": "ami-fe98aa99"
+            },
+            "ap-northeast-2": {
+                "Windows2008r2SQL": "ami-41e63b2f"
+            },
+            "ap-southeast-1": {
+                "Windows2008r2SQL": "ami-4d3bbe2e"
+            },
+            "ap-southeast-2": {
+                "Windows2008r2SQL": "ami-00232963"
+            },
+            "ap-south-1": {
+                "Windows2008r2SQL": "ami-d3067bbc"
+            },
+            "us-east-2": {
+                "Windows2008r2SQL": "ami-b7c1e6d2"
+            },
+            "ca-central-1": {
+                "Windows2008r2SQL": "ami-4a813d2e"
+            },
+            "sa-east-1": {
+                "Windows2008r2SQL": "ami-c66a05aa"
+            }
+        }
+    },
+    "Resources": {
+        "PrivateSubnet1a": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "PrivateSubnet1aCIDR"
+                },
+                "VpcId": {
+                    "Ref": "vpc"
+                },
+                "AvailabilityZone": {
+                    "Ref": "PrivateSubnet1aAZ"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "Pri-UE1/1A"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Subnet"
+                    }
+                ]
+            }
+        },
+        "PrivateSubnet1b": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "PrivateSubnet1bCIDR"
+                },
+                "VpcId": {
+                    "Ref": "vpc"
+                },
+                "AvailabilityZone": {
+                    "Ref": "PrivateSubnet1bAZ"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "Pri-UE1/1B"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Subnet"
+                    }
+                ]
+            }
+        },
+        "CustomTablePrivateSubnet1aAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": "rtb-3193e94b",
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1a"
+                }
+            }
+        },
+        "CustomTablePrivateSubnet1bAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": "rtb-3193e94b",
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1b"
+                }
+            }
+        },
+		"FtpS3EndPoint": {
+		  "Type" : "AWS::EC2::VPCEndpoint",
+		  "Properties" : {
+			"PolicyDocument" : {
+				"Version":"2012-10-17",
+				"Statement":[{
+					"Action": "s3:*",
+					"Effect": "Allow",
+					"Resource": "arn:aws:s3:::d-lvlftp-beanstalk-s3/*",
+					"Principal": "*"
+				}]
+			},
+			"RouteTableIds" : ["rtb-3193e94b"],
+			"ServiceName" : "com.amazonaws.us-east-1.s3",
+			"VpcId": {
+                    "Ref": "vpc"
+                }
+		  }
+		},
+        "WebTier": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "DisableApiTermination": "true",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "AvailabilityZone": "us-east-1a",
+                "IamInstanceProfile": {
+                    "Ref": "Ec2InstanceProfile"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "Windows2012r2"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceTypeWebServer"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+				"BlockDeviceMappings" : [
+				   {
+					  "DeviceName" : "/dev/sda1",
+					  "Ebs" : { "VolumeSize" : {"Ref" : "WebServerRootVolumeSize"} }
+				   }
+				], 
+                "Monitoring": "false",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "<script>\n",
+									"powershell.exe tzutil /s 'Pacific Standard Time' \n",
+                                "</script>\n",
+								"<powershell>\n",
+									"$reg = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings';",
+									"$settings = Get-ItemProperty -Path $reg;",
+									"$settings.ProxyServer;",
+									"$settings.ProxyEnable;",
+									"Set-ItemProperty -Path $reg -Name ProxyServer -Value 10.153.53.20:8082;",
+									"Set-ItemProperty -Path $reg -Name ProxyEnable -Value 1;",
+									"$serviceKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\AmazonSSMAgent';",
+									"$keyInfo = (Get-Item -Path $serviceKey).GetValue('Environment');",
+									"$proxyVariables = @('http_proxy=10.153.53.20:8082', 'no_proxy=169.254.169.254');",
+									"If($keyInfo -eq $null){",
+										"New-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables -PropertyType MultiString -Force;}",
+									"else {",
+										"Set-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables;}",
+									"Restart-Service AmazonSSMAgent;",
+								"</powershell>\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "WebServer-EC2"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "EC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "Primary network interface for Web Server",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "PrivateSubnet1a"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "RnRCoreSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "SSRSSSIS": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "DisableApiTermination": "true",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "IamInstanceProfile": {
+                    "Ref": "Ec2InstanceProfile"
+                },
+                "AvailabilityZone": "us-east-1a",
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionSSRSAMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "Windows2008r2SQL"
+                    ]
+                },
+				"BlockDeviceMappings" : [
+				   {
+					  "DeviceName" : "/dev/sda1",
+					  "Ebs" : { "VolumeSize" : {"Ref" : "SSRSServerRootVolumeSize"} }
+				   }
+				], 
+				"InstanceType": {
+                    "Ref": "InstanceTypeSSRSServer"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "Monitoring": "false",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "<script>\n",
+									"powershell.exe tzutil /s 'Pacific Standard Time' \n",
+                                "</script>\n",
+								"<powershell>\n",
+									"$reg = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings';",
+									"$settings = Get-ItemProperty -Path $reg;",
+									"$settings.ProxyServer;",
+									"$settings.ProxyEnable;",
+									"Set-ItemProperty -Path $reg -Name ProxyServer -Value 10.153.53.20:8082;",
+									"Set-ItemProperty -Path $reg -Name ProxyEnable -Value 1;",
+									"$serviceKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\AmazonSSMAgent';",
+									"$keyInfo = (Get-Item -Path $serviceKey).GetValue('Environment');",
+									"$proxyVariables = @('http_proxy=10.153.53.20:8082', 'no_proxy=169.254.169.254');",
+									"If($keyInfo -eq $null){",
+										"New-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables -PropertyType MultiString -Force;}",
+									"else {",
+										"Set-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables;}",
+									"Restart-Service AmazonSSMAgent;",
+								"</powershell>\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "SSRS/SSIS-EC2"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "EC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "Primary network interface for SSRS server",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "PrivateSubnet1a"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "RnRCoreSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "AppTier": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "DisableApiTermination": "true",
+                "InstanceInitiatedShutdownBehavior": "stop",
+                "AvailabilityZone": "us-east-1a",
+                "IamInstanceProfile": {
+                    "Ref": "Ec2InstanceProfile"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSRegionArch2AMI",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "Windows2012r2"
+                    ]
+                },
+				"BlockDeviceMappings" : [
+				   {
+					  "DeviceName" : "/dev/sda1",
+					  "Ebs" : { "VolumeSize" : {"Ref" : "AppServerRootVolumeSize"} }
+				   }
+				], 
+                "InstanceType": {
+                    "Ref": "InstanceTypeAppServer"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "Monitoring": "false",
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "<script>\n",
+									"powershell.exe tzutil /s 'Pacific Standard Time' \n",
+                                "</script>\n",
+								"<powershell>\n",
+									"$reg = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings';",
+									"$settings = Get-ItemProperty -Path $reg;",
+									"$settings.ProxyServer;",
+									"$settings.ProxyEnable;",
+									"Set-ItemProperty -Path $reg -Name ProxyServer -Value 10.153.53.20:8082;",
+									"Set-ItemProperty -Path $reg -Name ProxyEnable -Value 1;",
+									"$serviceKey = 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\AmazonSSMAgent';",
+									"$keyInfo = (Get-Item -Path $serviceKey).GetValue('Environment');",
+									"$proxyVariables = @('http_proxy=10.153.53.20:8082', 'no_proxy=169.254.169.254');",
+									"If($keyInfo -eq $null){",
+										"New-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables -PropertyType MultiString -Force;}",
+									"else {",
+										"Set-ItemProperty -Path $serviceKey -Name Environment -Value $proxyVariables;}",
+									"Restart-Service AmazonSSMAgent;",
+								"</powershell>\n"
+                            ]
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "AppServer-EC2"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "EC2"
+                    }
+                ],
+                "NetworkInterfaces": [
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "Primary network interface for App Server",
+                        "DeviceIndex": 0,
+                        "SubnetId": {
+                            "Ref": "PrivateSubnet1a"
+                        },
+                        "GroupSet": [
+                            {
+                                "Ref": "RnRCoreSecurityGroup"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "DBServer": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "AllocatedStorage": {
+                    "Ref": "RDSStorage"
+                },
+                "AllowMajorVersionUpgrade": "false",
+                "AutoMinorVersionUpgrade": "true",
+                "AvailabilityZone": {
+                    "Ref": "RDSAZ"
+                },
+                "DBInstanceClass": {
+                    "Ref": "DBInstanceClass"
+                },
+                "DBInstanceIdentifier": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "EnvironmentType"
+                            },
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            "DB-RDS"
+                        ]
+                    ]
+                },
+                "Port": "1433",
+                "BackupRetentionPeriod": "0",
+                "StorageType": "gp2",
+                "MasterUsername": {
+                    "Ref": "DBUsername"
+                },
+                "MasterUserPassword": {
+                    "Ref": "DBPassword"
+                },
+                "PreferredMaintenanceWindow": "thu:10:50-thu:11:20",
+                "PubliclyAccessible": "False",
+                "Engine": "sqlserver-ee",
+                "EngineVersion": "12.00.5000.0.v1",
+                "LicenseModel": "license-included",
+                "OptionGroupName": {
+                    "Ref": "RDSSQLOptionGroup"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "RDSDBParameterGroup"
+                },
+                "DBSubnetGroupName": {
+                    "Ref": "RDSSubnetGroup"
+                },
+                "Tags": [
+                    {
+                        "Key": "AWS Service",
+                        "Value": "RDS"
+                    }
+                ],
+                "VPCSecurityGroups": [
+                    {
+                        "Ref": "DBServerSecurityGroup"
+                    }
+                ]
+            }
+        },
+        "RDSSQLOptionGroup": {
+            "Type": "AWS::RDS::OptionGroup",
+            "Properties": {
+                "EngineName": "sqlserver-ee",
+                "MajorEngineVersion": "12.00",
+                "OptionGroupDescription": "RDS SQL Server EE option group",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+									"OptionGroup-RDS"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Option Group"
+                    }
+                ]
+            }
+        },
+        "RDSDBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "RDS SQL Server EE Parameter Group",
+                "Family": "sqlserver-ee-12.0",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+									"ParameterGroup-RDS"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Parameter Group"
+                    }
+                ]
+            }
+        },
+        "RDSSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupDescription": "RDS SQL SERVER EE Subnet Group",
+                "SubnetIds": [
+                    {
+                        "Ref": "PrivateSubnet1a"
+                    },
+                    {
+                        "Ref": "PrivateSubnet1b"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+									"SubnetGroup-RDS"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Subnet Group"
+                    }
+                ]
+            }
+        },
+        "FTPS3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": "u-rnr-exports-s3",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+									"S3-Bucket"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "S3Bucket"
+                    }
+                ]
+            }
+        },
+        "EC2Role": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonRDSFullAccess",
+                    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+                    "arn:aws:iam::aws:policy/CloudWatchFullAccess",
+                    "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM",
+                    "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+                    "arn:aws:iam::aws:policy/CloudWatchEventsFullAccess",
+                    "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
+                ],
+                "Path": "/",
+                "RoleName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "EnvironmentType"
+                            },
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            "EC2-Role"
+                        ]
+                    ]
+                }
+            }
+        },
+        "Ec2InstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "EC2Role"
+                    }
+                ]
+            }
+        },
+        "RolePolicies": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "Ec2S3AccessPolicy",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "s3:*",
+                            "Resource": [
+                                "arn:aws:s3:::rnrdevbucket/*"
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "EC2Role"
+                    }
+                ]
+            },
+            "DependsOn": "FTPS3Bucket"
+        },
+        "RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group for App/Web Server",
+                "GroupName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "EnvironmentType"
+                            },
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            "Core-EC2-SG"
+                        ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "vpc"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "Core-EC2-SG"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Security Group"
+                    }
+                ]
+            }
+        },
+        "DBServerSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Security Group for RDS instance",
+                "GroupName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            {
+                                "Ref": "EnvironmentType"
+                            },
+                            {
+                                "Ref": "ApplicationName"
+                            },
+                            "DB-SG"
+                        ]
+                    ]
+                },
+                "VpcId": {
+                    "Ref": "vpc"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    {
+                                        "Ref": "EnvironmentType"
+                                    },
+                                    {
+                                        "Ref": "ApplicationName"
+                                    },
+                                    "DB-SG"
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "AWS Service",
+                        "Value": "Security Group"
+                    }
+                ]
+            }
+        },
+		"InboundRule1RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "3389",
+                "ToPort": "3389",
+                "CidrIp": "10.153.36.70/32"
+            }
+        },
+        "InboundRule2RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "443",
+                "ToPort": "443",
+                "CidrIp": {
+                    "Ref": "XendesktopIP"
+                }
+            }
+        },
+        "InboundRule3RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "82",
+                "ToPort": "82",
+                "CidrIp": {
+                    "Ref": "XendesktopIP"
+                }
+            }
+        },
+        "InboundRule4RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "84",
+                "ToPort": "84",
+                "CidrIp": {
+                    "Ref": "XendesktopIP"
+                }
+            }
+        },
+        "InboundRule5RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "5672",
+                "ToPort": "5672",
+                "SourceSecurityGroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                }
+            }
+        },
+        "InboundRule6RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "15672",
+                "ToPort": "15672",
+                "SourceSecurityGroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                }
+            }
+        },
+        "InboundRule7RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "8085",
+                "ToPort": "8085",
+                "SourceSecurityGroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                }
+            }
+        },
+        "InboundRule8RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "83",
+                "ToPort": "83",
+                "CidrIp": {
+                    "Ref": "XendesktopIP"
+                }
+            }
+        },
+        "InboundRule9RnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "8090",
+                "ToPort": "8090",
+                "SourceSecurityGroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                }
+            }
+        },
+        "InboundRule1RDS": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "DBServerSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "1433",
+                "ToPort": "1433",
+                "SourceSecurityGroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                }
+            }
+        },
+		"InboundRule2RDS": {
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "DBServerSecurityGroup"
+                },
+                "IpProtocol": "tcp",
+                "FromPort": "1433",
+                "ToPort": "1433",
+                "CidrIp": {
+                    "Ref": "XendesktopIP"
+                }
+            }
+        },
+        "OutboundRuleRnRCoreSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "RnRCoreSecurityGroup"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "OutboundRuleRDS": {
+            "Type": "AWS::EC2::SecurityGroupEgress",
+            "Properties": {
+                "GroupId": {
+                    "Ref": "DBServerSecurityGroup"
+                },
+                "IpProtocol": "-1",
+                "CidrIp": "0.0.0.0/0"
+            }
+        }
+    },
+    "Outputs": {
+        "BucketName": {
+            "Value": {
+                "Ref": "FTPS3Bucket"
+            },
+            "Description": "Name of the Amazon S3 Bucket"
+        }
+    },
+    "Description": "UAT Infrastructure Setup for RnR Application"
+}

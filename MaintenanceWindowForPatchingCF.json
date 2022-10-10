@@ -1,0 +1,189 @@
+ {
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Global Name"
+                    },
+                    "Parameters": [
+                        "ApplicationName",
+                        "EnvironmentType"
+                    ]
+                },
+				{
+                    "Label": {
+                        "default": "Maintenance Window"
+                    },
+                    "Parameters": [
+                          "ScheduleTime",
+						  "DurationOfWindow",
+						  "CutoffTime"
+                    ]
+                },
+				{
+                    "Label": {
+                        "default": "Maintenance Window Target"
+                    },
+                    "Parameters": [
+                          "InstanceOwnerInformation"
+                    ]
+                },
+				{
+                    "Label": {
+                        "default": "Maintenance Window Task"
+                    },
+                    "Parameters": [
+                          "MaxErrorsBeforeStop",
+						  "SSMServiceRoleArn",
+						  "PriorityOfTask",
+						  "S3BucketName"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "ApplicationName": {
+            "Description": "The Application Name",
+            "Type": "String",
+            "Default": "RnR",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+        },
+        "EnvironmentType": {
+            "Description": "The environment type",
+            "Type": "String",
+            "Default": "UAT",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+        },
+		"ScheduleTime": {
+			"Description": "CRON format schedule time for maintenance window",
+            "Type": "String",
+            "Default": "CRON(0 0 0 ? * SUN *)"
+		},
+		"DurationOfWindow" : {
+			"Description": "Time duration in hour for maintenance window",
+            "Type": "Number",
+            "Default": "5"
+		},
+		"CutoffTime" : {
+			"Description": "Cutoff Time in hour for maintenance window",
+            "Type": "Number",
+            "Default": "1"
+		},
+		"InstanceOwnerInformation" : {
+			"Description": "Owner Information of Instance fleet for patching",
+            "Type": "String",
+            "Default": "RnR",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+		},
+		"MaxErrorsBeforeStop" : {
+			"Description": "Max Error allowed before stopping the task",
+            "Type": "Number",
+            "Default": "10"
+		},
+		"PriorityOfTask" : {
+			"Description": "Priority of task in integer",
+            "Type": "Number",
+            "Default": "1"
+		},
+		"SSMServiceRoleArn" : {
+			"Description": "Valid IAM Role ARN to be able to use SSM",
+            "Type": "String",
+		},
+		"S3BucketName" : {
+			"Description": "Valid S3 Bucket Name that contains logs of patching",
+            "Type": "String",
+            "ConstraintDescription": "Must begin with a letter and contain only alphanumeric characters."
+		}
+    },
+ 
+	"Resources": {
+		"MaintenanceWindow" : {
+		  "Type" : "AWS::SSM::MaintenanceWindow",
+		  "Properties" : {
+			"Description" : "Maintenance Window for Patching",
+			"AllowUnassociatedTargets" : false,
+			"Cutoff" : {"Ref" : "CutoffTime"},
+			"Schedule" : {"Ref" : "ScheduleTime"},
+			"Duration" : {"Ref" : "DurationOfWindow"},
+			"Name" : {
+                "Fn::Join": [
+                    "-",
+                    [
+                        {
+                            "Ref": "EnvironmentType"
+                        },
+                        {
+                            "Ref": "ApplicationName"
+                        },
+                        "patching-window"
+                    ]
+                ]
+            }
+		  }
+		},
+		"MaintenanceWindowTarget" : {
+		  "Type" : "AWS::SSM::MaintenanceWindowTarget",
+		  "Properties" : {
+			"OwnerInformation" : {"Ref" : "InstanceOwnerInformation"},
+			"Description" : "RnR UAT instance fleet for pathing",
+			"WindowId" : {"Ref" : "MaintenanceWindow"},
+			"ResourceType" : "INSTANCE",
+			"Targets" : [ {"Key":"tag:Application", "Values":["RnR"]} ],
+			"Name" : {
+                "Fn::Join": [
+                    "-",
+                    [
+                        {
+                            "Ref": "EnvironmentType"
+                        },
+                        {
+                            "Ref": "ApplicationName"
+                        },
+                        "patching-target"
+                    ]
+                ]
+            }
+		  }
+		},
+		"MaintenanceWindowTask" : {
+		  "Type" : "AWS::SSM::MaintenanceWindowTask",
+		  "Properties" : {
+			"MaxErrors" : {"Ref" : "MaxErrorsBeforeStop"},
+			"Description" : "RnR UAT instance Ptching Task",
+			"ServiceRoleArn" : {"Ref" : "SSMServiceRoleArn"},
+			"Priority" : {"Ref" : "PriorityOfTask"},
+			"MaxConcurrency" : 1,
+			"Targets" : [ {"Key":"WindowTargetIds", "Values":[{"Ref" : "MaintenanceWindowTarget"}]} ],
+			"Name" : {
+                "Fn::Join": [
+                    "-",
+                    [
+                        {
+                            "Ref": "EnvironmentType"
+                        },
+                        {
+                            "Ref": "ApplicationName"
+                        },
+                        "patching-task"
+                    ]
+                ]
+            },
+			"TaskArn" : "AWS-InstallWindowsUpdates",
+			"WindowId" : {"Ref" : "MaintenanceWindow"},
+			"TaskType" : "RUN_COMMAND",
+			"LoggingInfo" : {
+				"S3Bucket" : {"Ref" : "S3BucketName"},
+				"Region" : "us-east-1",
+				"S3Prefix" : "patching-logs"
+			}
+		  }
+		}
+	},
+	"Description": "Maintenance Window Setup for Patching in EC2 Instances"
+}
